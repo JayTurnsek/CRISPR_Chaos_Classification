@@ -1,0 +1,14 @@
+-- Gets information used for preprocessFromDB.py. Classification, sequence range, and genBank name.
+
+SELECT clustercas.class, crisprlocus.start, crisprlocus.length, name FROM (
+SELECT genbank, sequence.id AS seqID, COUNT(class) as classCount FROM
+strain  JOIN sequence ON (strain.id = sequence.strain)
+	    JOIN clustercas ON (clustercas.sequence = sequence.id)
+GROUP BY genbank, seqID
+) AS subQ JOIN clustercas ON (subQ.seqID = clustercas.sequence)
+	      JOIN crisprlocus ON (subQ.seqID = crisprlocus.sequence)
+	      JOIN entity ON (subQ.seqID = entity.id)
+WHERE classCount = 1 AND
+evidencelevel = 4 AND
+crisprlocus.length > 1000;
+
